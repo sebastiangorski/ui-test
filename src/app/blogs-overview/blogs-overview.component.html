@@ -1,0 +1,42 @@
+<div class="blog-grid-wrapper">
+
+  <ng-container *ngIf="loading">
+    <div>
+      Loading posts...
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !loadError">
+    <ng-container *ngIf="(blogPosts2$ | async) as blogPosts">
+    <div class="blog-grid">
+      <div class="blog-post" *ngFor="let post of blogPosts.blogs; trackBy: trackByFn">
+        <div class="blog-post__image">
+          <img [src]="post.photo_url" alt="Blog post image">
+        </div>
+        <div class="blog-post__heading">
+          <h3>{{post.title}}</h3>
+        </div>
+        <div class="blog-post__description">
+          <p>{{post.description}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="grid-pagination">
+<!--      <wc-pagination-->
+<!--        [currentPage]="currentPage"-->
+<!--        [totalPages]="totalPages"-->
+<!--        [pagesToShow]="pagesToShow"-->
+<!--        withElipsis-->
+<!--        (pagination-change)="onPaginationChange($event)"-->
+<!--      >-->
+
+<!--      </wc-pagination>-->
+    </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="loadError">
+    <p>Something went wrong...</p>
+  </ng-container>
+
+</div>
