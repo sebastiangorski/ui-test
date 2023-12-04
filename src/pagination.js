@@ -71,7 +71,7 @@ const t=t=>(e,o)=>{void 0!==o?o.addInitializer((()=>{customElements.define(t,e);
  */
 function n(n,r,t){return n?r(n):t?.(n)}
 
-const styles = i$2 `.pagination-button{min-width:32px;min-height:32px;background-color:#fff;color:#333;border:1px solid #f1f1f1}.pagination-button.current{color:#fff;background-color:#2f80ed}.pagination-button.elipsis{border:none}.pagination-button.elipsis:hover{background-color:unset}.pagination-button.with-string{border:none}.pagination-button[button-style=DEFAULT]{border-radius:8px}.pagination-button[button-style=CIRCLE]{border-radius:32px}.pagination-button:hover{color:#333;background-color:#f1f1f1}`;
+const styles = i$2 `.pagination-button{min-width:32px;min-height:32px;background-color:#fff;color:#333;border:1px solid #f1f1f1}.pagination-button.current{color:#fff;background-color:#2f80ed}.pagination-button.elipsis{border:none}.pagination-button.elipsis:hover{background-color:unset}.pagination-button.with-string{border:none}.pagination-button[button-style=DEFAULT]{border-radius:8px}.pagination-button[button-style=CIRCLE]{border-radius:32px}.pagination-button:disabled:not(.current,.elipsis){border-color:#f1f1f1;color:#ccc}.pagination-button:hover:not(:disabled,.current,.elipsis){color:#333;background-color:#f1f1f1}`;
 
 var ButtonStyle;
 (function (ButtonStyle) {
@@ -218,6 +218,9 @@ let WcPagination = class WcPagination extends s {
         if (typeof page === "number" && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
             this.currentPage = page;
             this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
+        }
+        if (typeof page === "string") {
+            this.currentPage = this.currentPage + 1;
         }
     }
 };
