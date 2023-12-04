@@ -7,7 +7,7 @@ import {BlogPosts } from '../models/blog-post.model';
   providedIn: 'root'
 })
 export class BlogService {
-  private apiUrl = 'https://api.slingacademy.com/v1/sample-data';
+  public readonly apiUrl = 'https://api.slingacademy.com/v1/sample-data';
 
   constructor(private http: HttpClient) { }
 

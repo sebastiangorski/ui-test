@@ -37,10 +37,10 @@ export class BlogsOverviewComponent implements OnInit {
   }
 
   private getBlogPosts(): void {
+    this.loading = true;
     this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize).subscribe(
       {
         next: (posts: BlogPosts) => {
-          console.log(posts);
           this.blogPosts = posts.blogs;
           this.totalPages = Math.ceil(posts.total_blogs / this.pageSize - 1);
           this.loadError = false;
@@ -55,6 +55,4 @@ export class BlogsOverviewComponent implements OnInit {
       }
     )
   }
-
-  protected readonly event = event;
 }
