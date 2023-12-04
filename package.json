@@ -6,7 +6,11 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+      "storybook": "storybook dev -p 6006",
+      "build-styles": "sass-render --q --suffix '.css.ts' -t ./sass-template.js './src/stories/**/*.scss'",
+      "build-storybook": "storybook build",
+      "build:lit": "rollup -c"
   },
   "private": true,
   "dependencies": {
@@ -18,14 +22,34 @@
     "@angular/platform-browser": "^16.0.0",
     "@angular/platform-browser-dynamic": "^16.0.0",
     "@angular/router": "^16.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@storybook/web-components-webpack5": "^7.6.3",
+    "lit": "^3.1.0",
+    "rollup-plugin-lit-css": "^4.0.1",
+    "rollup-plugin-terser": "^7.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "wc-sass-render": "^1.4.0",
     "zone.js": "~0.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.0.5",
     "@angular/cli": "~16.0.5",
     "@angular/compiler-cli": "^16.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.42",
+    "@babel/plugin-proposal-decorators": "^7.0.0-beta.42",
+    "@babel/plugin-syntax-decorators": "^7.23.3",
+    "@babel/preset-env": "^7.23.5",
+    "@babel/preset-typescript": "^7.23.3",
+    "@storybook/addon-docs": "^7.6.3",
+    "@storybook/addon-essentials": "^7.6.3",
+    "@storybook/addon-interactions": "^7.6.3",
+    "@storybook/addon-links": "^7.6.3",
+    "@storybook/blocks": "^7.6.3",
+    "@storybook/html": "^7.6.3",
+    "@storybook/html-webpack5": "^7.6.3",
+    "@storybook/test": "^7.6.3",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -33,6 +57,10 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.6.3",
+    "ts-loader": "^9.5.1",
     "typescript": "~5.0.2"
   }
 }
