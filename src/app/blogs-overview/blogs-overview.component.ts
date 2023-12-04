@@ -11,7 +11,7 @@ import {Observable, Subject, concatMap, of, tap } from 'rxjs';
 })
 export class BlogsOverviewComponent implements OnInit {
 
-  //blogPosts: BlogPost[] = [];
+  blogPosts: BlogPost[] = [];
   loading = true;
   loadError: boolean = false;
 
@@ -21,54 +21,40 @@ export class BlogsOverviewComponent implements OnInit {
   pagesToShow = 3;
   totalPages = 0;
 
-  blogPosts2$: Observable<BlogPosts> = of({} as BlogPosts);
-  constructor(private blogService: BlogService) {
-    this.blogPosts2$ = this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize)
-  }
+  constructor(private blogService: BlogService) { }
 
   ngOnInit() {
-    // this.blogPosts2.pipe(
-    //   concatMap(() => {
-    //     return this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize);
-    //   }),
-    //   tap((posts) => {
-    //     console.log(posts);
-    //     this.blogPosts = posts.blogs;
-    //     this.totalPages = posts.total_blogs;
-    //     this.loadError = false;
-    //     this.loading = false;
-    //   })
-    // ).subscribe()
+    this.getBlogPosts();
   }
 
   onPaginationChange(event: Event) {
     this.currentPage = (event as CustomEvent<number>).detail;
-    //this.getBlogPosts();
+    this.getBlogPosts();
   }
 
   trackByFn(index: number, item: any): any {
     return item.id;
   }
 
-  // private getBlogPosts(): void {
-  //   this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize).subscribe(
-  //     {
-  //       next: (posts: BlogPosts) => {
-  //         console.log(posts);
-  //         //this.blogPosts = posts.blogs;
-  //         this.totalPages = posts.total_blogs;
-  //         this.loadError = false;
-  //         this.loading = false;
-  //       },
-  //       error: (e) => {
-  //         console.log(e);
-  //         this.loadError = true;
-  //         this.loading = false;
-  //       },
-  //       complete: () => console.log('Blog posts loaded')
-  //     }
-  //   )
-  // }
+  private getBlogPosts(): void {
+    this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize).subscribe(
+      {
+        next: (posts: BlogPosts) => {
+          console.log(posts);
+          this.blogPosts = posts.blogs;
+          this.totalPages = Math.ceil(posts.total_blogs / this.pageSize - 1);
+          this.loadError = false;
+          this.loading = false;
+        },
+        error: (e) => {
+          console.log(e);
+          this.loadError = true;
+          this.loading = false;
+        },
+        complete: () => console.log('Blog posts loaded')
+      }
+    )
+  }
 
   protected readonly event = event;
 }

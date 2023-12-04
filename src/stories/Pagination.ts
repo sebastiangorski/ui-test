@@ -173,6 +173,10 @@ export class WcPagination extends LitElement {
       this.currentPage = page;
       this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
     }
+
+    if (typeof page === "string") {
+      this.currentPage = this.currentPage + 1;
+    }
   }
 }
 

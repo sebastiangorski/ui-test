@@ -30,7 +30,12 @@
     border-radius: 32px;
   }
 
-  &:hover {
+  &:disabled:not(.current, .elipsis) {
+    border-color: #F1F1F1;
+    color: #CCCCCC;
+  }
+
+  &:hover:not(:disabled, .current, .elipsis) {
     color: #333333;
     background-color: #F1F1F1;
   }
