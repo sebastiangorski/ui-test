@@ -219,6 +219,9 @@ let WcPagination = class WcPagination extends s {
             this.currentPage = page;
             this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
         }
+        if (typeof page === "string") {
+            this.currentPage = this.currentPage + 1;
+        }
     }
 };
 __decorate([

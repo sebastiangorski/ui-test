@@ -23,6 +23,7 @@ export class BlogsOverviewComponent implements OnInit {
 
   blogPosts2$: Observable<BlogPosts> = of({} as BlogPosts);
   constructor(private blogService: BlogService) {
+    // To use async pipe in HTML, but issue with the import
     this.blogPosts2$ = this.blogService.getPaginatedBlogPosts(this.currentPage, this.pageSize)
   }
 

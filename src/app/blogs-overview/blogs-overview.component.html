@@ -22,15 +22,14 @@
       </div>
     </div>
     <div class="grid-pagination">
-<!--      <wc-pagination-->
-<!--        [currentPage]="currentPage"-->
-<!--        [totalPages]="totalPages"-->
-<!--        [pagesToShow]="pagesToShow"-->
-<!--        withElipsis-->
-<!--        (pagination-change)="onPaginationChange($event)"-->
-<!--      >-->
+      <wc-pagination
+        [currentPage]="currentPage"
+        [totalPages]="blogPosts.total_blogs"
+        [pagesToShow]="pagesToShow"
+        (pagination-change)="onPaginationChange($event)"
+      >
 
-<!--      </wc-pagination>-->
+      </wc-pagination>
     </div>
     </ng-container>
   </ng-container>
