@@ -78,7 +78,14 @@ var ButtonStyle;
     ButtonStyle["default"] = "DEFAULT";
     ButtonStyle["circle"] = "CIRCLE";
 })(ButtonStyle || (ButtonStyle = {}));
-let WcPagination = class WcPagination extends s {
+let WcPagination = 
+/**
+ * @element wc-pagination
+ *
+ * @event (CustomEvent<number>) pagination-change - Emits the currently selected page in the paginator
+ *
+ */
+class WcPagination extends s {
     constructor() {
         super(...arguments);
         this.currentPage = 1;
@@ -219,9 +226,6 @@ let WcPagination = class WcPagination extends s {
             this.currentPage = page;
             this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
         }
-        if (typeof page === "string") {
-            this.currentPage = this.currentPage + 1;
-        }
     }
 };
 __decorate([
@@ -244,6 +248,12 @@ __decorate([
 ], WcPagination.prototype, "withElipsis", void 0);
 WcPagination = __decorate([
     t('wc-pagination')
+    /**
+     * @element wc-pagination
+     *
+     * @event (CustomEvent<number>) pagination-change - Emits the currently selected page in the paginator
+     *
+     */
 ], WcPagination);
 const name = 'wc-pagination';
 if (!customElements.get(name)) {
