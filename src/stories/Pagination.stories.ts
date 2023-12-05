@@ -15,7 +15,25 @@ export default {
       control: { type: 'boolean' },
     },
   },
-
+  parameters: {
+    docs: {
+      description: {
+        component: 'Pagination component',
+      },
+      events: [
+        {
+          name: 'pagination-change',
+          description: 'Emitted when the current page changes.',
+          properties: [
+            {
+              name: 'detail',
+              description: 'The new current page number.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 };
 
 export const Interactive = (args: WcPagination) => html`

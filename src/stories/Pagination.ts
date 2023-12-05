@@ -11,6 +11,12 @@ export enum ButtonStyle {
 type PageItem = number | '...';
 
 @customElement('wc-pagination')
+/**
+ * @element wc-pagination
+ *
+ * @event (CustomEvent<number>) pagination-change - Emits the currently selected page in the paginator
+ *
+ */
 export class WcPagination extends LitElement {
   /**
    * @ignore
