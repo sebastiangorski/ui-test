@@ -15,7 +15,7 @@ export class BlogsOverviewComponent implements OnInit {
   loading = true;
   loadError: boolean = false;
 
-  pageSize = 6;
+  pageSize = 6; // Number of posts loaded
 
   currentPage = 1;
   pagesToShow = 3;
