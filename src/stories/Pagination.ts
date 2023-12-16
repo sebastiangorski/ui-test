@@ -1,13 +1,15 @@
-import { LitElement, TemplateResult, html, nothing } from 'lit';
+import { LitElement, TemplateResult, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
-import {styles} from "./Pagination.css"
+import { classMap } from 'lit/directives/class-map.js';
+import { styles } from './Pagination.css';
 
 export enum ButtonStyle {
-  "default" = "DEFAULT",
-  "circle" = "CIRCLE"
+  'default' = 'DEFAULT',
+  'circle' = 'CIRCLE'
 }
 
+type ControlButtonType = 'first' | 'previous' | 'next' | 'last';
 type PageItem = number | '...';
 
 @customElement('wc-pagination')
@@ -26,156 +28,186 @@ export class WcPagination extends LitElement {
   @property({ type: Number }) currentPage = 1;
   @property({ type: Number }) totalPages = 1;
   @property({ type: Number }) pagesToShow = 3;
-  @property({ type: ButtonStyle }) buttonStyle: ButtonStyle = ButtonStyle.default
+  @property({ type: ButtonStyle }) buttonStyle: ButtonStyle = ButtonStyle.default;
   @property({ type: Boolean }) textControls = false;
   @property({ type: Boolean }) withElipsis = false;
 
   override render() {
-    const buttonType = this.textControls && 'with-string';
-
     return html`
       <div>
-        ${when(!this.textControls,
-          () => html`
-            <button
-                class="pagination-button ${buttonType}"
-                button-style="${this.buttonStyle}"
-                @click="${this.firstPage}"
-                ?disabled="${this.currentPage === 1}"
-            >
-              ${'<<'}
-            </button>
-          `,
-          () => nothing
-        )}
-
-        <button
-          class="pagination-button ${buttonType}"
-          button-style="${this.buttonStyle}"
-          text-controls="${this.textControls}"
-          @click="${this.previousPage}"
-          ?disabled="${this.currentPage === 1}"
-        >
-          ${this.textControls ? 'Prev' : '<'}
-        </button>
-
-        ${this.renderPageButtons()}
-
-        <button
-          class="pagination-button ${buttonType}"
-          button-style="${this.buttonStyle}"
-          @click="${this.nextPage}"
-          ?disabled="${this.currentPage === this.totalPages}"
-        >
-          ${this.textControls ? 'Next' : '>'}
-        </button>
-
-        ${when(!this.textControls,
-          () => html`
-            <button
-              class="pagination-button ${buttonType}"
-              button-style="${this.buttonStyle}"
-              @click="${this.lastPage}"
-              ?disabled="${this.currentPage === this.totalPages}"
-            >
-              ${'>>'}
-            </button>
-          `,
-          () => nothing
-        )}
+        ${when(!this.textControls, () => this.renderControlButton('first'))} ${this.renderControlButton('previous')}
+        ${this.renderPageButtons()} ${this.renderControlButton('next')}
+        ${when(!this.textControls, () => this.renderControlButton('last'))}
       </div>
     `;
   }
 
-  renderPageButtons(): TemplateResult[] {
-    const pages: PageItem[] = this.withElipsis ? this.calculateVisiblePagesWithElipsis() : this.calculateVisiblePagesWithoutElipsi();
+  private renderControlButton(buttonType: ControlButtonType): TemplateResult {
+    const classes = { withString: this.textControls };
+    let content = '';
+    let disabled = false;
+    let clickAction = () => {};
+
+    switch (true) {
+      case buttonType === 'first':
+        content = '<<';
+        disabled = this.currentPage === 1;
+        clickAction = this.firstPage;
+        break;
+      case buttonType === 'previous':
+        content = this.textControls ? 'Prev' : '<';
+        disabled = this.currentPage === 1;
+        clickAction = this.previousPage;
+        break;
+      case buttonType === 'next':
+        content = this.textControls ? 'Next' : '>';
+        disabled = this.currentPage === this.totalPages;
+        clickAction = this.nextPage;
+        break;
+      case buttonType === 'last':
+        content = '>>';
+        disabled = this.currentPage === this.totalPages;
+        clickAction = this.lastPage;
+        break;
+    }
+
+    return html`
+      <button
+        class="pagination-button ${classMap(classes)}"
+        button-style="${this.buttonStyle}"
+        @click="${clickAction}"
+        ?disabled="${disabled}"
+      >
+        ${content}
+      </button>
+    `;
+  }
+
+  private renderPageButtons(): TemplateResult[] {
+    const pages: PageItem[] = this.withElipsis
+      ? this.calculateVisiblePagesWithElipsis()
+      : this.calculateVisiblePagesWithoutElipsis();
+
     return pages.map((page) => {
+      const classes = { current: page === this.currentPage, elipsis: page === '...' };
       const disabled: boolean = page === '...' || this.currentPage === page;
-      const currentPage: string = page === this.currentPage ? 'current' : '';
-      const elipsis: string = page === '...' ? 'elipsis' : '';
 
       return html`
         <button
-          class="pagination-button ${currentPage} ${elipsis}"
+          class="pagination-button ${classMap(classes)}"
           button-style="${this.buttonStyle}"
           @click="${() => this.goToPage(page)}"
           ?disabled="${disabled}"
         >
           ${page}
         </button>
-    `
+      `;
     });
   }
 
-  calculateVisiblePagesWithElipsis(): PageItem[] {
-    const pages: PageItem[] = [];
-    const startPage: number = Math.max(1, this.currentPage - Math.floor(this.pagesToShow / 2));
-    const endPage: number = Math.min(this.totalPages, startPage + this.pagesToShow - 1);
+  private calculateRange = (start, end) => {
+    const length = end - start + 1;
+    return Array.from({ length }, (_, i) => start + i);
+  };
 
-    // Pages before elips
-    for (let page = startPage; page <= endPage; page++) {
-      pages.push(page);
-    }
+  private calculateVisiblePagesWithElipsis(): PageItem[] {
+    const boundaryCount = 1;
+    const siblingCount = 1;
+    const count = this.totalPages;
+    const page = this.currentPage;
 
-    // Last page after elipsis
-    if (endPage < this.totalPages) {
-      if (endPage < this.totalPages  && endPage <= this.totalPages - this.pagesToShow) {
-        pages.push('...');
-      } else {
-        pages.push(this.totalPages - 1);
-      }
+    const startPages = this.calculateRange(1, Math.min(boundaryCount, count));
+    const endPages = this.calculateRange(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
 
-      // if (this.currentPage === this.totalPages - this.pagesToShow) {
-      //   pages.unshift('...');
-      // }
+    const siblingsStart = Math.max(
+      Math.min(
+        // Natural start
+        page - siblingCount,
+        // Lower boundary when page is high
+        count - boundaryCount - siblingCount * 2 - 1
+      ),
+      // Greater than startPages
+      boundaryCount + 2
+    );
 
-      pages.push(this.totalPages);
-    }
-    return pages;
+    const siblingsEnd = Math.min(
+      Math.max(
+        // Natural end
+        page + siblingCount,
+        // Upper boundary when page is low
+        boundaryCount + siblingCount * 2 + 2
+      ),
+      // Less than endPages
+      endPages.length > 0 ? endPages[0] - 2 : count - 1
+    );
+
+    const itemList = [
+      ...startPages,
+
+      // Start ellipsis
+      ...(siblingsStart > boundaryCount + 2
+        ? ['...']
+        : boundaryCount + 1 < count - boundaryCount
+          ? [boundaryCount + 1]
+          : []),
+
+      // Sibling pages
+      ...this.calculateRange(siblingsStart, siblingsEnd),
+
+      // End ellipsis
+      ...(siblingsEnd < count - boundaryCount - 1
+        ? ['...']
+        : count - boundaryCount > boundaryCount
+          ? [count - boundaryCount]
+          : []),
+
+      ...endPages
+    ];
+
+    return itemList;
   }
 
-  calculateVisiblePagesWithoutElipsi(): PageItem[] {
-    const pageRange: number[] = [];
-    const totalButtons = 5;
+  private calculateVisiblePagesWithoutElipsis(): PageItem[] {
+    let pageRange: number[] = [];
 
-    if (this.totalPages <= totalButtons) {
-      pageRange.push(...Array.from({ length: this.totalPages }, (_, i) => i + 1));
+    if (this.totalPages <= this.pagesToShow) {
+      pageRange = this.calculateRange(1, this.totalPages);
     } else {
       let start = Math.max(1, this.currentPage - 2);
-      const end = Math.min(start + totalButtons - 1, this.totalPages);
+      const end = Math.min(start + this.pagesToShow - 1, this.totalPages);
 
-      if (end - start + 1 < totalButtons) {
-        start = end - totalButtons + 1;
+      if (end - start + 1 < this.pagesToShow) {
+        start = end - this.pagesToShow + 1;
       }
 
-      pageRange.push(...Array.from({ length: end - start + 1 }, (_, i) => start + i));
+      pageRange = this.calculateRange(start, end);
     }
 
     return pageRange;
   }
 
-  firstPage() {
+  private firstPage() {
     this.goToPage(1);
   }
 
-  previousPage() {
+  private previousPage() {
     if (this.currentPage > 1) {
       this.goToPage(this.currentPage - 1);
     }
   }
 
-  nextPage() {
+  private nextPage() {
     if (this.currentPage < this.totalPages) {
       this.goToPage(this.currentPage + 1);
     }
   }
 
-  lastPage() {
+  private lastPage() {
     this.goToPage(this.totalPages);
   }
 
-  goToPage(page: PageItem) {
-    if (typeof page === "number" && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+  private goToPage(page: PageItem) {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
       this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
     }

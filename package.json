@@ -7,10 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-      "storybook": "storybook dev -p 6006",
-      "build-styles": "sass-render --q --suffix '.css.ts' -t ./sass-template.js './src/stories/**/*.scss'",
-      "build-storybook": "storybook build",
-      "build:lit": "rollup -c"
+    "storybook": "storybook dev -p 6006",
+    "build-styles": "sass-render --q --suffix '.css.ts' -t ./sass-template.js './src/stories/**/*.scss'",
+    "build-storybook": "storybook build",
+    "build:lit": "rollup -c"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +26,7 @@
     "@rollup/plugin-typescript": "^11.1.5",
     "@storybook/web-components-webpack5": "^7.6.3",
     "lit": "^3.1.0",
+    "prettier": "^3.1.1",
     "rollup-plugin-lit-css": "^4.0.1",
     "rollup-plugin-terser": "^7.0.2",
     "rxjs": "~7.8.0",

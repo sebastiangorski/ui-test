@@ -1,7 +1,7 @@
 import './Pagination';
-import {ButtonStyle, WcPagination} from "./Pagination";
-import {html} from "lit";
-import {Meta, StoryObj} from "@storybook/html";
+import { ButtonStyle, WcPagination } from './Pagination';
+import { html } from 'lit';
+import { Meta, StoryObj } from '@storybook/html';
 
 const meta: Meta<WcPagination> = {
   title: 'wc-pagination',
@@ -9,7 +9,7 @@ const meta: Meta<WcPagination> = {
   parameters: {
     docs: {
       description: {
-        component: 'Pagination component',
+        component: 'Pagination component'
       },
       events: [
         {
@@ -18,32 +18,32 @@ const meta: Meta<WcPagination> = {
           properties: [
             {
               name: 'detail',
-              description: 'The new current page number.',
-            },
-          ],
-        },
-      ],
+              description: 'The new current page number.'
+            }
+          ]
+        }
+      ]
     },
     actions: {
       handles: ['pagination-change'],
       onClick: 'clicked'
-    },
+    }
   },
   argTypes: {
     currentPage: {
       description: 'Currently set pagination page',
       defaultValue: 1,
-      control: { type: 'number', min: 0},
+      control: { type: 'number', min: 0 }
     },
     totalPages: {
       description: 'Max number of pagination pages available',
       defaultValue: 1,
-      control: { type: 'number', min: 1},
+      control: { type: 'number', min: 1 }
     },
     pagesToShow: {
       description: 'Number of pages to display before elipsis',
       defaultValue: 3,
-      control: { type: 'number', min: 0},
+      control: { type: 'number', min: 0 }
     },
     buttonStyle: {
       options: [ButtonStyle.default, ButtonStyle.circle],
@@ -60,8 +60,8 @@ const meta: Meta<WcPagination> = {
     withElipsis: {
       description: 'Display pagination with elipsis',
       defaultValue: false
-    },
-  },
+    }
+  }
 };
 
 export default meta;
@@ -71,29 +71,29 @@ export const Default: Story = {
   args: {
     currentPage: 1,
     totalPages: 10,
-    pagesToShow: 3,
+    pagesToShow: 5,
     buttonStyle: ButtonStyle.default,
     textControls: false,
     withElipsis: false
-  },
+  }
 };
 
 export const Elipsis: Story = {
   args: {
     ...Default.args,
-    withElipsis: true,
-  },
+    withElipsis: true
+  }
 };
 
 export const TextControls: Story = {
   args: {
     ...Default.args,
-    textControls: true,
-  },
+    textControls: true
+  }
 };
 
-export const Interactive = (args: WcPagination) => html`
-  <wc-pagination
+export const Interactive = (args: WcPagination) =>
+  html` <wc-pagination
     currentPage="${args.currentPage}"
     totalPages="${args.totalPages}"
     pagesToShow="${args.pagesToShow}"
