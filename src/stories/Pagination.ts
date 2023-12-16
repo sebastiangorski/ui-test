@@ -1,13 +1,15 @@
 import { LitElement, TemplateResult, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
-import {styles} from "./Pagination.css"
+import { classMap } from 'lit/directives/class-map.js';
+import { styles } from './Pagination.css';
 
 export enum ButtonStyle {
-  "default" = "DEFAULT",
-  "circle" = "CIRCLE"
+  'default' = 'DEFAULT',
+  'circle' = 'CIRCLE'
 }
 
+type ControlButtonType = 'first' | 'previous' | 'next' | 'last';
 type PageItem = number | '...';
 
 @customElement('wc-pagination')
@@ -26,84 +28,79 @@ export class WcPagination extends LitElement {
   @property({ type: Number }) currentPage = 1;
   @property({ type: Number }) totalPages = 1;
   @property({ type: Number }) pagesToShow = 3;
-  @property({ type: ButtonStyle }) buttonStyle: ButtonStyle = ButtonStyle.default
+  @property({ type: ButtonStyle }) buttonStyle: ButtonStyle = ButtonStyle.default;
   @property({ type: Boolean }) textControls = false;
   @property({ type: Boolean }) withElipsis = false;
 
   override render() {
-    const buttonType = this.textControls && 'with-string';
-
     return html`
       <div>
-        ${when(!this.textControls,
-          () => html`
-            <button
-                class="pagination-button ${buttonType}"
-                button-style="${this.buttonStyle}"
-                @click="${this.firstPage}"
-                ?disabled="${this.currentPage === 1}"
-            >
-              ${'<<'}
-            </button>
-          `,
-          () => nothing
-        )}
-
-        <button
-          class="pagination-button ${buttonType}"
-          button-style="${this.buttonStyle}"
-          text-controls="${this.textControls}"
-          @click="${this.previousPage}"
-          ?disabled="${this.currentPage === 1}"
-        >
-          ${this.textControls ? 'Prev' : '<'}
-        </button>
-
-        ${this.renderPageButtons()}
-
-        <button
-          class="pagination-button ${buttonType}"
-          button-style="${this.buttonStyle}"
-          @click="${this.nextPage}"
-          ?disabled="${this.currentPage === this.totalPages}"
-        >
-          ${this.textControls ? 'Next' : '>'}
-        </button>
-
-        ${when(!this.textControls,
-          () => html`
-            <button
-              class="pagination-button ${buttonType}"
-              button-style="${this.buttonStyle}"
-              @click="${this.lastPage}"
-              ?disabled="${this.currentPage === this.totalPages}"
-            >
-              ${'>>'}
-            </button>
-          `,
-          () => nothing
-        )}
+        ${this.renderControlButton('first')} ${this.renderControlButton('previous')} ${this.renderPageButtons()}
+        ${this.renderControlButton('next')} ${this.renderControlButton('last')}
       </div>
     `;
   }
 
+  renderControlButton(buttonType: ControlButtonType): TemplateResult {
+    const classes = { withString: this.textControls };
+    let content = '';
+    let disabled = false;
+    let clickAction = () => {};
+
+    switch (true) {
+      case buttonType === 'first' && !this.textControls:
+        content = '<<';
+        disabled = this.currentPage === 1;
+        clickAction = this.firstPage;
+        break;
+      case buttonType === 'previous':
+        content = this.textControls ? 'Prev' : '<';
+        disabled = this.currentPage === 1;
+        clickAction = this.previousPage;
+        break;
+      case buttonType === 'next':
+        content = this.textControls ? 'Next' : '>';
+        disabled = this.currentPage === this.totalPages;
+        clickAction = this.nextPage;
+        break;
+      case buttonType === 'last' && !this.textControls:
+        content = '>>';
+        disabled = this.currentPage === this.totalPages;
+        clickAction = this.lastPage;
+        break;
+    }
+
+    return html`
+      <button
+        class="pagination-button ${classMap(classes)}"
+        button-style="${this.buttonStyle}"
+        @click="${clickAction}"
+        ?disabled="${disabled}"
+      >
+        ${content}
+      </button>
+    `;
+  }
+
   renderPageButtons(): TemplateResult[] {
-    const pages: PageItem[] = this.withElipsis ? this.calculateVisiblePagesWithElipsis() : this.calculateVisiblePagesWithoutElipsi();
+    const pages: PageItem[] = this.withElipsis
+      ? this.calculateVisiblePagesWithElipsis()
+      : this.calculateVisiblePagesWithoutElipsis();
+
     return pages.map((page) => {
+      const classes = { current: page === this.currentPage, elipsis: page === '...' };
       const disabled: boolean = page === '...' || this.currentPage === page;
-      const currentPage: string = page === this.currentPage ? 'current' : '';
-      const elipsis: string = page === '...' ? 'elipsis' : '';
 
       return html`
         <button
-          class="pagination-button ${currentPage} ${elipsis}"
+          class="pagination-button ${classMap(classes)}"
           button-style="${this.buttonStyle}"
           @click="${() => this.goToPage(page)}"
           ?disabled="${disabled}"
         >
           ${page}
         </button>
-    `
+      `;
     });
   }
 
@@ -119,7 +116,7 @@ export class WcPagination extends LitElement {
 
     // Last page after elipsis
     if (endPage < this.totalPages) {
-      if (endPage < this.totalPages  && endPage <= this.totalPages - this.pagesToShow) {
+      if (endPage < this.totalPages && endPage <= this.totalPages - this.pagesToShow) {
         pages.push('...');
       } else {
         pages.push(this.totalPages - 1);
@@ -134,18 +131,17 @@ export class WcPagination extends LitElement {
     return pages;
   }
 
-  calculateVisiblePagesWithoutElipsi(): PageItem[] {
+  calculateVisiblePagesWithoutElipsis(): PageItem[] {
     const pageRange: number[] = [];
-    const totalButtons = 5;
 
-    if (this.totalPages <= totalButtons) {
+    if (this.totalPages <= this.pagesToShow) {
       pageRange.push(...Array.from({ length: this.totalPages }, (_, i) => i + 1));
     } else {
       let start = Math.max(1, this.currentPage - 2);
-      const end = Math.min(start + totalButtons - 1, this.totalPages);
+      const end = Math.min(start + this.pagesToShow - 1, this.totalPages);
 
-      if (end - start + 1 < totalButtons) {
-        start = end - totalButtons + 1;
+      if (end - start + 1 < this.pagesToShow) {
+        start = end - this.pagesToShow + 1;
       }
 
       pageRange.push(...Array.from({ length: end - start + 1 }, (_, i) => start + i));
@@ -175,7 +171,7 @@ export class WcPagination extends LitElement {
   }
 
   goToPage(page: PageItem) {
-    if (typeof page === "number" && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+    if (typeof page === 'number' && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
       this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
     }
