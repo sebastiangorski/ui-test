@@ -1,4 +1,4 @@
-import { LitElement, TemplateResult, html, nothing } from 'lit';
+import { LitElement, TemplateResult, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -35,8 +35,9 @@ export class WcPagination extends LitElement {
   override render() {
     return html`
       <div>
-        ${this.renderControlButton('first')} ${this.renderControlButton('previous')} ${this.renderPageButtons()}
-        ${this.renderControlButton('next')} ${this.renderControlButton('last')}
+        ${when(!this.textControls, () => this.renderControlButton('first'))} ${this.renderControlButton('previous')}
+        ${this.renderPageButtons()} ${this.renderControlButton('next')}
+        ${when(!this.textControls, () => this.renderControlButton('last'))}
       </div>
     `;
   }
@@ -48,7 +49,7 @@ export class WcPagination extends LitElement {
     let clickAction = () => {};
 
     switch (true) {
-      case buttonType === 'first' && !this.textControls:
+      case buttonType === 'first':
         content = '<<';
         disabled = this.currentPage === 1;
         clickAction = this.firstPage;
@@ -63,7 +64,7 @@ export class WcPagination extends LitElement {
         disabled = this.currentPage === this.totalPages;
         clickAction = this.nextPage;
         break;
-      case buttonType === 'last' && !this.textControls:
+      case buttonType === 'last':
         content = '>>';
         disabled = this.currentPage === this.totalPages;
         clickAction = this.lastPage;
@@ -105,30 +106,65 @@ export class WcPagination extends LitElement {
   }
 
   calculateVisiblePagesWithElipsis(): PageItem[] {
-    const pages: PageItem[] = [];
-    const startPage: number = Math.max(1, this.currentPage - Math.floor(this.pagesToShow / 2));
-    const endPage: number = Math.min(this.totalPages, startPage + this.pagesToShow - 1);
+    const boundaryCount = 1;
+    const siblingCount = 1;
+    const count = this.totalPages;
+    const page = this.currentPage;
 
-    // Pages before elips
-    for (let page = startPage; page <= endPage; page++) {
-      pages.push(page);
-    }
+    const range = (start, end) => {
+      const length = end - start + 1;
+      return Array.from({ length }, (_, i) => start + i);
+    };
 
-    // Last page after elipsis
-    if (endPage < this.totalPages) {
-      if (endPage < this.totalPages && endPage <= this.totalPages - this.pagesToShow) {
-        pages.push('...');
-      } else {
-        pages.push(this.totalPages - 1);
-      }
+    const startPages = range(1, Math.min(boundaryCount, count));
+    const endPages = range(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
 
-      // if (this.currentPage === this.totalPages - this.pagesToShow) {
-      //   pages.unshift('...');
-      // }
+    const siblingsStart = Math.max(
+      Math.min(
+        // Natural start
+        page - siblingCount,
+        // Lower boundary when page is high
+        count - boundaryCount - siblingCount * 2 - 1
+      ),
+      // Greater than startPages
+      boundaryCount + 2
+    );
 
-      pages.push(this.totalPages);
-    }
-    return pages;
+    const siblingsEnd = Math.min(
+      Math.max(
+        // Natural end
+        page + siblingCount,
+        // Upper boundary when page is low
+        boundaryCount + siblingCount * 2 + 2
+      ),
+      // Less than endPages
+      endPages.length > 0 ? endPages[0] - 2 : count - 1
+    );
+
+    const itemList = [
+      ...startPages,
+
+      // Start ellipsis
+      ...(siblingsStart > boundaryCount + 2
+        ? ['...']
+        : boundaryCount + 1 < count - boundaryCount
+          ? [boundaryCount + 1]
+          : []),
+
+      // Sibling pages
+      ...range(siblingsStart, siblingsEnd),
+
+      // End ellipsis
+      ...(siblingsEnd < count - boundaryCount - 1
+        ? ['...']
+        : count - boundaryCount > boundaryCount
+          ? [count - boundaryCount]
+          : []),
+
+      ...endPages
+    ];
+
+    return itemList;
   }
 
   calculateVisiblePagesWithoutElipsis(): PageItem[] {
