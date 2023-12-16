@@ -107,6 +107,10 @@ class WcPagination extends s {
         this.buttonStyle = ButtonStyle.default;
         this.textControls = false;
         this.withElipsis = false;
+        this.calculateRange = (start, end) => {
+            const length = end - start + 1;
+            return Array.from({ length }, (_, i) => start + i);
+        };
     }
     /**
      * @ignore
@@ -183,12 +187,8 @@ class WcPagination extends s {
         const siblingCount = 1;
         const count = this.totalPages;
         const page = this.currentPage;
-        const range = (start, end) => {
-            const length = end - start + 1;
-            return Array.from({ length }, (_, i) => start + i);
-        };
-        const startPages = range(1, Math.min(boundaryCount, count));
-        const endPages = range(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
+        const startPages = this.calculateRange(1, Math.min(boundaryCount, count));
+        const endPages = this.calculateRange(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
         const siblingsStart = Math.max(Math.min(
         // Natural start
         page - siblingCount, 
@@ -212,7 +212,7 @@ class WcPagination extends s {
                     ? [boundaryCount + 1]
                     : []),
             // Sibling pages
-            ...range(siblingsStart, siblingsEnd),
+            ...this.calculateRange(siblingsStart, siblingsEnd),
             // End ellipsis
             ...(siblingsEnd < count - boundaryCount - 1
                 ? ['...']
@@ -224,9 +224,9 @@ class WcPagination extends s {
         return itemList;
     }
     calculateVisiblePagesWithoutElipsis() {
-        const pageRange = [];
+        let pageRange = [];
         if (this.totalPages <= this.pagesToShow) {
-            pageRange.push(...Array.from({ length: this.totalPages }, (_, i) => i + 1));
+            pageRange = this.calculateRange(1, this.totalPages);
         }
         else {
             let start = Math.max(1, this.currentPage - 2);
@@ -234,7 +234,7 @@ class WcPagination extends s {
             if (end - start + 1 < this.pagesToShow) {
                 start = end - this.pagesToShow + 1;
             }
-            pageRange.push(...Array.from({ length: end - start + 1 }, (_, i) => start + i));
+            pageRange = this.calculateRange(start, end);
         }
         return pageRange;
     }

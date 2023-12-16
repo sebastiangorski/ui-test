@@ -42,7 +42,7 @@ export class WcPagination extends LitElement {
     `;
   }
 
-  renderControlButton(buttonType: ControlButtonType): TemplateResult {
+  private renderControlButton(buttonType: ControlButtonType): TemplateResult {
     const classes = { withString: this.textControls };
     let content = '';
     let disabled = false;
@@ -83,7 +83,7 @@ export class WcPagination extends LitElement {
     `;
   }
 
-  renderPageButtons(): TemplateResult[] {
+  private renderPageButtons(): TemplateResult[] {
     const pages: PageItem[] = this.withElipsis
       ? this.calculateVisiblePagesWithElipsis()
       : this.calculateVisiblePagesWithoutElipsis();
@@ -105,19 +105,19 @@ export class WcPagination extends LitElement {
     });
   }
 
-  calculateVisiblePagesWithElipsis(): PageItem[] {
+  private calculateRange = (start, end) => {
+    const length = end - start + 1;
+    return Array.from({ length }, (_, i) => start + i);
+  };
+
+  private calculateVisiblePagesWithElipsis(): PageItem[] {
     const boundaryCount = 1;
     const siblingCount = 1;
     const count = this.totalPages;
     const page = this.currentPage;
 
-    const range = (start, end) => {
-      const length = end - start + 1;
-      return Array.from({ length }, (_, i) => start + i);
-    };
-
-    const startPages = range(1, Math.min(boundaryCount, count));
-    const endPages = range(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
+    const startPages = this.calculateRange(1, Math.min(boundaryCount, count));
+    const endPages = this.calculateRange(Math.max(count - boundaryCount + 1, boundaryCount + 1), count);
 
     const siblingsStart = Math.max(
       Math.min(
@@ -152,7 +152,7 @@ export class WcPagination extends LitElement {
           : []),
 
       // Sibling pages
-      ...range(siblingsStart, siblingsEnd),
+      ...this.calculateRange(siblingsStart, siblingsEnd),
 
       // End ellipsis
       ...(siblingsEnd < count - boundaryCount - 1
@@ -167,11 +167,11 @@ export class WcPagination extends LitElement {
     return itemList;
   }
 
-  calculateVisiblePagesWithoutElipsis(): PageItem[] {
-    const pageRange: number[] = [];
+  private calculateVisiblePagesWithoutElipsis(): PageItem[] {
+    let pageRange: number[] = [];
 
     if (this.totalPages <= this.pagesToShow) {
-      pageRange.push(...Array.from({ length: this.totalPages }, (_, i) => i + 1));
+      pageRange = this.calculateRange(1, this.totalPages);
     } else {
       let start = Math.max(1, this.currentPage - 2);
       const end = Math.min(start + this.pagesToShow - 1, this.totalPages);
@@ -180,33 +180,33 @@ export class WcPagination extends LitElement {
         start = end - this.pagesToShow + 1;
       }
 
-      pageRange.push(...Array.from({ length: end - start + 1 }, (_, i) => start + i));
+      pageRange = this.calculateRange(start, end);
     }
 
     return pageRange;
   }
 
-  firstPage() {
+  private firstPage() {
     this.goToPage(1);
   }
 
-  previousPage() {
+  private previousPage() {
     if (this.currentPage > 1) {
       this.goToPage(this.currentPage - 1);
     }
   }
 
-  nextPage() {
+  private nextPage() {
     if (this.currentPage < this.totalPages) {
       this.goToPage(this.currentPage + 1);
     }
   }
 
-  lastPage() {
+  private lastPage() {
     this.goToPage(this.totalPages);
   }
 
-  goToPage(page: PageItem) {
+  private goToPage(page: PageItem) {
     if (typeof page === 'number' && page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
       this.dispatchEvent(new CustomEvent('pagination-change', { detail: this.currentPage }));
